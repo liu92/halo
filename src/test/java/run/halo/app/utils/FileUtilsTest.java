@@ -2,11 +2,12 @@ package run.halo.app.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import run.halo.app.model.support.HaloConst;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,25 +37,25 @@ public class FileUtilsTest {
 
         try (Stream<Path> pathStream = Files.walk(tempDirectory)) {
             List<Path> walkList = pathStream.collect(Collectors.toList());
-            walkList.forEach(System.out::println);
+            walkList.forEach(path -> log.debug(path.toString()));
             Assert.assertThat(walkList.size(), equalTo(4));
         }
 
         try (Stream<Path> pathStream = Files.walk(tempDirectory, 1)) {
             List<Path> walkList = pathStream.collect(Collectors.toList());
-            walkList.forEach(System.out::println);
+            walkList.forEach(path -> log.debug(path.toString()));
             Assert.assertThat(walkList.size(), equalTo(2));
         }
 
         try (Stream<Path> pathStream = Files.list(tempDirectory)) {
             List<Path> walkList = pathStream.collect(Collectors.toList());
-            walkList.forEach(System.out::println);
+            walkList.forEach(path -> log.debug(path.toString()));
             Assert.assertThat(walkList.size(), equalTo(1));
         }
 
         try (Stream<Path> pathStream = Files.list(testPath)) {
             List<Path> walkList = pathStream.collect(Collectors.toList());
-            walkList.forEach(System.out::println);
+            walkList.forEach(path -> log.debug(path.toString()));
             Assert.assertThat(walkList.size(), equalTo(0));
         }
 
@@ -91,5 +92,20 @@ public class FileUtilsTest {
     @Test
     public void tempFolderTest() {
         log.debug(HaloConst.TEMP_DIR);
+    }
+
+    @Test
+    @Ignore
+    public void dbFileReadTest() throws IOException {
+        Path dbPath = Paths.get(HaloConst.USER_HOME + "/halo-test/db/halo.mv.db");
+
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(dbPath.toString(), "r")) {
+            randomAccessFile.seek(2283640);
+            byte[] buffer = new byte[1024];
+            int count = randomAccessFile.read(buffer, 0, buffer.length);
+            log.debug("Count: [{}]", count);
+            String bufString = new String(buffer);
+            log.debug("Buffer String: [{}]", bufString);
+        }
     }
 }

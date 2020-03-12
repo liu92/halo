@@ -60,30 +60,30 @@ public class AliOssFileHandler implements FileHandler {
 
         if (StringUtils.isNotEmpty(domain)) {
             basePath.append(domain)
-                    .append("/");
+                .append("/");
         } else {
             basePath.append(bucketName)
-                    .append(".")
-                    .append(endPoint)
-                    .append("/");
+                .append(".")
+                .append(endPoint)
+                .append("/");
         }
 
         try {
-            String basename = FilenameUtils.getBasename(file.getOriginalFilename());
+            String basename = FilenameUtils.getBasename(Objects.requireNonNull(file.getOriginalFilename()));
             String extension = FilenameUtils.getExtension(file.getOriginalFilename());
             String timestamp = String.valueOf(System.currentTimeMillis());
             StringBuilder upFilePath = new StringBuilder();
 
             if (StringUtils.isNotEmpty(source)) {
                 upFilePath.append(source)
-                        .append("/");
+                    .append("/");
             }
 
             upFilePath.append(basename)
-                    .append("_")
-                    .append(timestamp)
-                    .append(".")
-                    .append(extension);
+                .append("_")
+                .append(timestamp)
+                .append(".")
+                .append(extension);
 
             String filePath = StringUtils.join(basePath.toString(), upFilePath.toString());
 
@@ -116,19 +116,13 @@ public class AliOssFileHandler implements FileHandler {
                 }
             }
 
+            log.info("Uploaded file: [{}] successfully", file.getOriginalFilename());
             return uploadResult;
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new FileOperationException("上传附件 " + file.getOriginalFilename() + " 到阿里云失败 ", e).setErrorData(file.getOriginalFilename());
         } finally {
             ossClient.shutdown();
         }
-
-        // Build result
-        UploadResult result = new UploadResult();
-
-        log.info("File: [{}] uploaded successfully", file.getOriginalFilename());
-
-        return result;
     }
 
     @Override
@@ -154,7 +148,7 @@ public class AliOssFileHandler implements FileHandler {
     }
 
     @Override
-    public boolean supportType(AttachmentType type) {
-        return AttachmentType.ALIOSS.equals(type);
+    public boolean supportType(String type) {
+        return AttachmentType.ALIOSS.name().equalsIgnoreCase(type);
     }
 }

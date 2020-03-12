@@ -1,5 +1,7 @@
 package run.halo.app.service.impl;
 
+import cn.hutool.core.util.IdUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -29,6 +31,7 @@ import java.util.stream.Stream;
  * @date 2019-12-06
  */
 @Service
+@Slf4j
 public class StaticStorageServiceImpl implements StaticStorageService {
 
     private final Path staticDir;
@@ -59,6 +62,7 @@ public class StaticStorageServiceImpl implements StaticStorageService {
 
             pathStream.forEach(path -> {
                 StaticFile staticFile = new StaticFile();
+                staticFile.setId(IdUtil.fastSimpleUUID());
                 staticFile.setName(path.getFileName().toString());
                 staticFile.setPath(path.toString());
                 staticFile.setRelativePath(StringUtils.removeStart(path.toString(), staticDir.toString()));
@@ -88,7 +92,7 @@ public class StaticStorageServiceImpl implements StaticStorageService {
         Assert.notNull(relativePath, "Relative path must not be null");
 
         Path path = Paths.get(staticDir.toString(), relativePath);
-        System.out.println(path.toString());
+        log.debug(path.toString());
 
         try {
             if (path.toFile().isDirectory()) {

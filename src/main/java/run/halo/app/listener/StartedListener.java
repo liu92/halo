@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ansi.AnsiColor;
+import org.springframework.boot.ansi.AnsiOutput;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
@@ -57,18 +59,19 @@ public class StartedListener implements ApplicationListener<ApplicationStartedEv
     public void onApplicationEvent(ApplicationStartedEvent event) {
         this.migrate();
         this.initThemes();
+        this.initDirectory();
         this.printStartInfo();
     }
 
     private void printStartInfo() {
         String blogUrl = optionService.getBlogBaseUrl();
 
-        log.info("Halo started at         {}", blogUrl);
-        log.info("Halo admin started at   {}/{}", blogUrl, haloProperties.getAdminPath());
+        log.info(AnsiOutput.toString(AnsiColor.BRIGHT_BLUE, "Halo started at         ", blogUrl));
+        log.info(AnsiOutput.toString(AnsiColor.BRIGHT_BLUE, "Halo admin started at   ", blogUrl, "/", haloProperties.getAdminPath()));
         if (!haloProperties.isDocDisabled()) {
-            log.debug("Halo api doc was enabled at  {}/swagger-ui.html", blogUrl);
+            log.debug(AnsiOutput.toString(AnsiColor.BRIGHT_BLUE, "Halo api doc was enabled at  ", blogUrl, "/swagger-ui.html"));
         }
-        log.info("Halo has started successfully!");
+        log.info(AnsiOutput.toString(AnsiColor.BRIGHT_YELLOW, "Halo has started successfully!"));
     }
 
     /**
@@ -77,12 +80,12 @@ public class StartedListener implements ApplicationListener<ApplicationStartedEv
     private void migrate() {
         log.info("Starting migrate database...");
         Flyway flyway = Flyway
-                .configure()
-                .locations("classpath:/migration")
-                .baselineVersion("1")
-                .baselineOnMigrate(true)
-                .dataSource(url, username, password)
-                .load();
+            .configure()
+            .locations("classpath:/migration")
+            .baselineVersion("1")
+            .baselineOnMigrate(true)
+            .dataSource(url, username, password)
+            .load();
         flyway.migrate();
         log.info("Migrate database succeed.");
     }
@@ -139,5 +142,25 @@ public class StartedListener implements ApplicationListener<ApplicationStartedEv
         }
 
         return fileSystem;
+    }
+
+    private void initDirectory() {
+        Path workPath = Paths.get(haloProperties.getWorkDir());
+        Path backupPath = Paths.get(haloProperties.getBackupDir());
+
+        try {
+            if (Files.notExists(workPath)) {
+                Files.createDirectories(workPath);
+                log.info("Created work directory: [{}]", workPath);
+            }
+
+            if (Files.notExists(backupPath)) {
+                Files.createDirectories(backupPath);
+                log.info("Created backup directory: [{}]", backupPath);
+            }
+
+        } catch (IOException ie) {
+            throw new RuntimeException("Failed to initialize directories", ie);
+        }
     }
 }

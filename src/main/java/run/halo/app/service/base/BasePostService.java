@@ -18,7 +18,8 @@ import java.util.Optional;
  * Base post service implementation.
  *
  * @author johnniang
- * @date 19-4-24
+ * @author ryanwang
+ * @date 2019-04-24
  */
 public interface BasePostService<POST extends BasePost> extends CrudService<POST, Integer> {
 
@@ -45,23 +46,33 @@ public interface BasePostService<POST extends BasePost> extends CrudService<POST
     long countByStatus(PostStatus status);
 
     /**
-     * Get post by url.
+     * Get post by slug.
      *
-     * @param url post url.
+     * @param slug post slug.
      * @return Post
      */
     @NonNull
-    POST getByUrl(@NonNull String url);
+    POST getBySlug(@NonNull String slug);
 
     /**
-     * Gets post by post status and url.
+     * Gets post by post status and slug.
      *
      * @param status post status must not be null
-     * @param url    post url must not be blank
+     * @param slug   post slug must not be blank
      * @return post info
      */
     @NonNull
-    POST getBy(@NonNull PostStatus status, @NonNull String url);
+    POST getBy(@NonNull PostStatus status, @NonNull String slug);
+
+    /**
+     * Gets post by post status and id.
+     *
+     * @param status post status must not be null
+     * @param id     post id must not be blank
+     * @return post info
+     */
+    @NonNull
+    POST getBy(@NonNull PostStatus status, @NonNull Integer id);
 
     /**
      * Lists all posts by post status.
@@ -80,7 +91,7 @@ public interface BasePostService<POST extends BasePost> extends CrudService<POST
      * @return a list of previous post
      */
     @NonNull
-    List<POST> listPrePosts(@NonNull Date date, int size);
+    List<POST> listPrevPosts(@NonNull Date date, int size);
 
     /**
      * Lits next posts.
@@ -99,7 +110,7 @@ public interface BasePostService<POST extends BasePost> extends CrudService<POST
      * @return an optional post
      */
     @NonNull
-    Optional<POST> getPrePost(@NonNull Date date);
+    Optional<POST> getPrevPost(@NonNull Date date);
 
     /**
      * Gets next post.
@@ -287,4 +298,22 @@ public interface BasePostService<POST extends BasePost> extends CrudService<POST
      */
     @NonNull
     List<POST> updateStatusByIds(@NonNull List<Integer> ids, @NonNull PostStatus status);
+
+    /**
+     * Replace post blog url in batch.
+     *
+     * @param oldUrl old blog url.
+     * @param newUrl new blog url.
+     * @return replaced posts.
+     */
+    @NonNull
+    List<BasePostDetailDTO> replaceUrl(@NonNull String oldUrl, @NonNull String newUrl);
+
+    /**
+     * Generate description.
+     *
+     * @param content html content must not be null.
+     * @return description
+     */
+    String generateDescription(@NonNull String content);
 }

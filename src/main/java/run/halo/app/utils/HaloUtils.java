@@ -1,5 +1,6 @@
 package run.halo.app.utils;
 
+import cn.hutool.core.util.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
@@ -17,7 +18,7 @@ import static run.halo.app.model.support.HaloConst.FILE_SEPARATOR;
  *
  * @author ryanwang
  * @author johnniang
- * @date 2017/12/22
+ * @date 2017-12-22
  */
 @Slf4j
 public class HaloUtils {
@@ -233,19 +234,21 @@ public class HaloUtils {
     }
 
     /**
-     * Normalize url.
+     * Normalize url
      *
-     * @param url url must not be blank
-     * @return normalized url
+     * @param originalUrl original url
+     * @return normalized url.
      */
     @NonNull
-    public static String normalizeUrl(@NonNull String url) {
-        Assert.hasText(url, "Url must not be blank");
+    public static String normalizeUrl(@NonNull String originalUrl) {
+        Assert.hasText(originalUrl, "Original Url must not be blank");
 
-        StringUtils.removeEnd(url, "html");
-        StringUtils.removeEnd(url, "htm");
+        if (StringUtils.startsWithAny(originalUrl, "/", "https://", "http://")
+            && !StringUtils.startsWith(originalUrl, "//")) {
+            return originalUrl;
+        }
 
-        return SlugUtils.slugify(url);
+        return URLUtil.normalize(originalUrl);
     }
 
     /**

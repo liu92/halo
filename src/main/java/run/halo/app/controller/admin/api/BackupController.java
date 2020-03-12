@@ -68,12 +68,13 @@ public class BackupController {
             contentType = request.getServletContext().getMimeType(backupResource.getFile().getAbsolutePath());
         } catch (IOException e) {
             log.warn("Could not determine file type", e);
+            // Ignore this error
         }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + backupResource.getFilename() + "\"")
-                .body(backupResource);
+            .contentType(MediaType.parseMediaType(contentType))
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + backupResource.getFilename() + "\"")
+            .body(backupResource);
     }
 
     @DeleteMapping("halo")
